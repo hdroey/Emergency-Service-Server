@@ -53,7 +53,7 @@ public class Reactor<T> implements Server<T> {
 
             while (!Thread.currentThread().isInterrupted()) {
 
-                selector.select();
+                selector.select(); //waiting until we receive something from any client
                 runSelectionThreadTasks();
 
                 for (SelectionKey key : selector.selectedKeys()) {
@@ -82,9 +82,9 @@ public class Reactor<T> implements Server<T> {
         pool.shutdown();
     }
 
-    /*package*/ void updateInterestedOps(SocketChannel chan, int ops) {
-        final SelectionKey key = chan.keyFor(selector);
-        if (Thread.currentThread() == selectorThread) {
+    /*package*/ void updateInterestedOps(SocketChannel chan, int ops) { //if some connection wants to change the subscription of events op_read/op_write
+        final SelectionKey key = chan.keyFor(selector);//op_read reading bytes from this sockets
+        if (Thread.currentThread() == selectorThread) {//op_write writing bytes to this sockets
             key.interestOps(ops);
         } else {
             selectorTasks.add(() -> {
@@ -109,7 +109,7 @@ public class Reactor<T> implements Server<T> {
         id++;
     }
 
-    private void handleReadWrite(SelectionKey key) {
+    private void handleReadWrite(SelectionKey key) { //handling reading/writing bytes between the server and the client
         @SuppressWarnings("unchecked")
         NonBlockingConnectionHandler<T> handler = (NonBlockingConnectionHandler<T>) key.attachment();
 
