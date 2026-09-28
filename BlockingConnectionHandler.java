@@ -11,12 +11,12 @@ import java.net.Socket;
 
 public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler<T> {
 
-    private final StompMessagingProtocol<T> protocol;
-    private final MessageEncoderDecoder<T> encdec;
-    private final Socket sock;
+    private final StompMessagingProtocol<T> protocol; //protocol- how we respond to messages
+    private final MessageEncoderDecoder<T> encdec; //the encoding decoding policty for upcoming bytes 
+    private final Socket sock; //socket
     private final int clientID;
-    private BufferedInputStream in;
-    private BufferedOutputStream out;
+    private BufferedInputStream in; //bytes from client going here
+    private BufferedOutputStream out; //bytes from the server going here
     private volatile boolean connected = true;
 
     public BlockingConnectionHandler(Socket sock, MessageEncoderDecoder<T> reader, StompMessagingProtocol<T> protocol,int clientID) {
