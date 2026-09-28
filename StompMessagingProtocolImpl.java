@@ -20,7 +20,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol<String
     }
 
     @Override
-    public void process(String message) {
+    public void process(String message) {//protocol for the server what to do based on the message arrived from the client
 
         String[] lined = message.split("\n");
         lined = cleanArray(lined);// removes all the \n and spaces
