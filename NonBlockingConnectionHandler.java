@@ -48,7 +48,7 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
         }
 
         if (success) {
-            buf.flip();
+            buf.flip(); //switch from writing to reading 
             return () -> {
                 try {
                     while (buf.hasRemaining()) {
