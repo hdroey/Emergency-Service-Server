@@ -24,7 +24,7 @@ std::mutex UserChannelEventMapLock;
 std::unordered_map<int, string> SubscriptionIdToChannel ;                 // subs id to channel name
 std::unordered_map<int, string> idToFrameMap ;                            // receipt id to Frame name
 std::unordered_map<int, int> ReceiptIdToSubscriptionId ;                     // rec id to sub id
-std::unordered_map<string, vector<Event>> UserChannelEventMap; // mapped channel,user ->event vector
+std::unordered_map<string, vector<Event>> UserChannelEventMap; // mapped channel,user ->event vector, all events reported to this specific channel by this user
 int main(int argc, char *argv[])
 {
     StompProtocol foo;
@@ -42,7 +42,7 @@ int StompProtocol::main(int argc, char *argv[])
             
             const short bufsize = 1024;
             char buf[bufsize];
-            std::cin.getline(buf, bufsize);
+            std::cin.getline(buf, bufsize);// parsing the command from the terminal
             std::string line(buf);
             vector<string> parsedCommand;
             boost::split(parsedCommand, line, boost::is_any_of(" "));
@@ -56,7 +56,7 @@ int StompProtocol::main(int argc, char *argv[])
                 break;
             }
         }
-        vector<string> hostport;
+        vector<string> hostport;//ip address
         boost::split(hostport, details[1], boost::is_any_of(":"));
         short port = atoi((hostport[1]).c_str());
         ch.setHost(hostport[0]);
@@ -68,7 +68,7 @@ int StompProtocol::main(int argc, char *argv[])
             break;
         }
         string sendLoginFrame = "CONNECT\naccept-version:1.2\nhost:stomp.cs.bgu.ac.il\nlogin:" + details[2] + "\npasscode:" + details[3]/* + "\0"*/;
-        ch.sendLine(sendLoginFrame);
+        ch.sendLine(sendLoginFrame); //send login frame to the server
         username = details[2];
         isConnected = checkLoginResponse(std::ref(ch));
         break;
@@ -127,7 +127,7 @@ void StompProtocol::readConsoleTask(ConnectionHandler &ch)
         }
         if ((parsedCommand).at(0) == "report")
         {
-            vector<string> reportEventVec = StompProtocol::createReportFrame(parsedCommand.at(1));// fix to generic path
+            vector<string> reportEventVec = StompProtocol::createReportFrame(parsedCommand.at(1));// fix to generic path report event to server, all clients subscribed to this channel will be forwarded this message
             for (string s : reportEventVec)
             {
                 ch.sendLine(s);
@@ -150,7 +150,7 @@ void StompProtocol::readConsoleTask(ConnectionHandler &ch)
         }
     }
 }
-void StompProtocol::readSocketTask(ConnectionHandler &ch)
+void StompProtocol::readSocketTask(ConnectionHandler &ch) //reading from the server
 {
     while(true){
     while (isConnected)
@@ -182,9 +182,9 @@ void StompProtocol::readSocketTask(ConnectionHandler &ch)
             std::cout << s << std::endl;
             }
         }
-        if ((vec).at(0) == "RECEIPT")
+        if ((vec).at(0) == "RECEIPT")//if the client asked from the server to confirm whether its done
         {
-            vector<string> extractReceiptId = splitString((vec).at(1), ":");
+            vector<string> extractReceiptId = splitString((vec).at(1), ":");//based on the message from the server the client preforms one of these actions
             if (getFromFrameMap(atoi((extractReceiptId).at(1).c_str())) == "SUBSCRIBE")
             {
                 int subscriptionID = getFromReceiptIdSubscriptionId(atoi((extractReceiptId).at(1).c_str()));
@@ -344,7 +344,7 @@ void StompProtocol::createSummaryFrame(const string& channel,const string& usern
     outFile << summarize(channel+","+username);
     outFile.close();
 }
-string StompProtocol::summarize(const string& hashKey)//fixed
+string StompProtocol::summarize(const string& hashKey)//fixed creates a text summary of all event reports for one specific (channel, user) pair.
 {
     if(UserChannelEventMap.count(hashKey)==0){
         std::cout << "No such channel+user combination exists" << std::endl;
