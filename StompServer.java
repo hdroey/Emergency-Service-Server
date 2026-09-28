@@ -7,7 +7,7 @@ import bgu.spl.net.srv.Server;
 public class StompServer {
 
     public static void main(String[] args) {
-        if(args[1].equals("tpc")){
+        if(args[1].equals("tpc")){ //tpc- for each client we create a new thread
             System.out.println("You chose tpc");
             Server.threadPerClient(
                 7777, 
