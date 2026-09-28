@@ -4,9 +4,9 @@ import java.util.concurrent.*;
 // import java.io.IOException;
 import bgu.spl.net.srv.ConnectionHandler;
 import bgu.spl.net.srv.Connections;
-
+//shared data base for all clients,user and connections
 public class ConnectionsImpl<T> implements Connections<T> {
-    private static class ConnectionsSingleton {
+    private static class ConnectionsSingleton { //a singleton implementation of this database
         private static final ConnectionsImpl<?> Singleton = new ConnectionsImpl<>();
     }
 
@@ -25,11 +25,11 @@ public class ConnectionsImpl<T> implements Connections<T> {
         originalID = new ConcurrentHashMap<>();
     }
 
-    ConcurrentHashMap<Integer, ConnectionHandler<T>> IDS;
-    ConcurrentLinkedQueue<Integer> activeIDS;
-    ConcurrentHashMap<Integer, String> activeUsersByID;
-    ConcurrentHashMap<String, ConcurrentLinkedQueue<String>> channels;// "Originalid,subscriptionId"
-    ConcurrentHashMap<String, String> UsernametoPasscode;
+    ConcurrentHashMap<Integer, ConnectionHandler<T>> IDS; //given a connection id return the connection handler of this user
+    ConcurrentLinkedQueue<Integer> activeIDS; //users connected to the server
+    ConcurrentHashMap<Integer, String> activeUsersByID;//connection id mapped to user name
+    ConcurrentHashMap<String, ConcurrentLinkedQueue<String>> channels;// "Originalid,subscriptionId" channel name to subscibed users
+    ConcurrentHashMap<String, String> UsernametoPasscode; //username to password
     ConcurrentHashMap<String/* ChannelName:OriginalID */, String> originalID;// return id in
                                                                              // channel|value:Originalid,subscriptionId
     ConcurrentHashMap<String/* ChannelName:connectionId,IdInChannel */, Integer> idByChannel;// return original ID
@@ -118,7 +118,7 @@ public class ConnectionsImpl<T> implements Connections<T> {
         return null;
     }
 
-    public void subscribe(int connectionId, String channel, int id) {
+    public void subscribe(int connectionId, String channel, int id) { //user subscribing to a channel
         idByChannel.put(channel + ":" + connectionId + "," + id, connectionId);
         originalID.put(channel + ":" + connectionId, connectionId + "," + id);
         channels.putIfAbsent(channel, new ConcurrentLinkedQueue<String>());
